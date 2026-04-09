@@ -1,7 +1,7 @@
 import yup from 'yup';
 import models from '../models/index.js';
 
-const { Sala, Turma } = models;
+const { Sala} = models;
 
 class SalaController {
   async store(req, res) {

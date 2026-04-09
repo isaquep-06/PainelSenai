@@ -2,12 +2,14 @@ import Sequelize from 'sequelize';
 import DatabaseConfig from '../database/index.js';
 import Sala from './Sala.js';
 import Turma from './Turma.js';
+import User from './User.js';
 
 const sequelize = DatabaseConfig;
 
 const models = {
   Sala: Sala.init(sequelize),
   Turma: Turma.init(sequelize),
+  User: User.init(sequelize),
 };
 
 // Associações
