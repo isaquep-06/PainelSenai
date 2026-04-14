@@ -3,7 +3,7 @@ import { Model, DataTypes } from "sequelize";
 class User extends Model {
     static init(sequelize) {
         return super.init({
-            usename: DataTypes.STRING,
+            username: DataTypes.STRING,
             password: DataTypes.STRING,
         },
             {

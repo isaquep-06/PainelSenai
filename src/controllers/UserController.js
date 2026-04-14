@@ -2,7 +2,7 @@ import yup from 'yup';
 import models from "../models/index.js";
 import bcrypt from 'bcryptjs';
 
-const { User } = models;
+const { User, Sala, Turma } = models;
 
 class UserController {
     async store(req, res) {
@@ -13,6 +13,7 @@ class UserController {
 
             password: yup
                 .string()
+                .min(6, 'A senha deve conter no mínimo 6 caracteres')
                 .required('A senha é obrigatória'),
         })
 
@@ -25,15 +26,15 @@ class UserController {
             return res.status(400).json({ error: err.errors });
         }
 
-        const {username, password} = req.body;
+        const { username, password } = req.body;
 
         const password_hash = await bcrypt.hash(password, 8);
 
         const existingUser = await User.findOne({
-            where: {username}
+            where: { username }
         })
 
-        if(existingUser) {
+        if (existingUser) {
             return res.status(400).json({
                 error: 'O nome de usuário já está em uso'
             })
@@ -47,13 +48,17 @@ class UserController {
 
             return res.status(201).json({
                 message: 'Usuário criado com sucesso!',
-                user
+                user: {
+                    id: user.id,
+                    username: user.username
+                }
             });
 
         } catch (err) {
-            return res.status(400).json({ error: 'Erro ao criar usuário' });
+            return res.status(400).json({ err });
         }
     }
+
 }
 
 export default new UserController();

@@ -11,7 +11,7 @@ module.exports = {
         allowNull: false,
       },
 
-      nome: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false,
       },
@@ -24,6 +24,7 @@ module.exports = {
       sala_id: {
         type: Sequelize.INTEGER,
         allowNull: true,
+        unique: true,
 
         references: {
           model: 'salas',
@@ -33,15 +34,16 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
       },
-
-      created_at: {
+      createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
+        defaultValue: Sequelize.NOW,
       },
 
-      updated_at: {
+      updatedAt: {
         type: Sequelize.DATE,
         allowNull: false,
+        defaultValue: Sequelize.NOW,
       },
     });
   },
