@@ -1,4 +1,6 @@
 import models from "../models/index.js";
+import ordenarSalas from "../Middleware/ordenarSala.js";
+import { Op } from "sequelize";
 
 const { Turma, Sala } = models;
 
@@ -11,34 +13,42 @@ class DashboardController {
 
       const where = {};
 
+      // 🔹 filtro de turno
       if (turno) {
         if (!validTurnos.includes(turno)) {
-          return res.status(400).json({
-            message: "Turno inválido"
-          });
+          return res.status(400).json({ message: "Turno inválido" });
         }
 
         where.turno = turno;
       }
 
+      // 🔥 REMOVE TURMAS SEM SALA
+      where.sala_id = {
+        [Op.ne]: null
+      };
+
       const turma = await Turma.findAll({
         where,
-        include: [{
-          model: Sala,
-          as: "Sala",
-          attributes: ["name"]
-        }],
-        attributes: ["name", "turno"]
+        include: [
+          {
+            model: Sala,
+            as: "Sala",
+            attributes: ["name"]
+          }
+        ],
+        attributes: ["id", "name", "turno"]
       });
 
-      const response = turma.map(t => ({
+      const response = turma.map((t) => ({
         id: t.id,
         turma: t.name,
-        sala: t.Sala?.name || "SEM SALA",
+        sala: t.Sala?.name,
         turno: t.turno
       }));
 
-      return res.status(200).json(response);
+      const ordenado = ordenarSalas(response);
+
+      return res.status(200).json(ordenado);
 
     } catch (err) {
       console.error(err);

@@ -9,8 +9,8 @@ class SalaController {
   // Criar sala 🔷 (ESPAÇOS DE AULA) -> POST
   async store(req, res) {
     const schema = yup.object().shape({
-      name: yup.string().required('Nome da sala é obrigatório'),
-      type: yup.string().required('Tipo da sala é obrigatório'),
+      name: yup.string().required(),
+      type: yup.string().required(),
     });
 
     try {
@@ -20,19 +20,30 @@ class SalaController {
     }
 
     const { name, type } = req.body;
-
     const nameDefault = name.trim().toLowerCase();
 
-    // Verificar se já existe sala com mesmo nome
-    const existingSala = await Sala.findOne({ where: { name: nameDefault } });
-    if (existingSala) {
-      return res.status(400).json({ message: 'Sala já existe!' });
-    }
-
     try {
-      const sala = await Sala.create(req.body);
-      return res.status(201).json({ message: 'Sala criada com sucesso!', sala });
+      const existingSala = await Sala.findOne({ where: { name: nameDefault } });
+
+      if (existingSala) {
+        return res.status(409).json({ message: 'Sala já existe!' });
+      }
+
+      const sala = await Sala.create({
+        name: nameDefault,
+        type
+      });
+
+      return res.status(201).json({
+        message: 'Sala criada com sucesso!',
+        sala
+      });
+
     } catch (err) {
+      if (err.name === "SequelizeUniqueConstraintError") {
+        return res.status(409).json({ message: "Sala já existe!" });
+      }
+
       console.error('Erro ao criar sala:', err);
       return res.status(500).json({ message: 'Erro interno ao criar sala' });
     }
