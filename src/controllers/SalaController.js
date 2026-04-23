@@ -1,12 +1,11 @@
-import yup from 'yup';
-import models from '../models/index.js';
-import { Op } from 'sequelize';
+import yup from "yup";
+import models from "../models/index.js";
+import { io } from "../server.js";
 
 const { Sala, Turma } = models;
 
 class SalaController {
 
-  // Criar sala 🔷 (ESPAÇOS DE AULA) -> POST
   async store(req, res) {
     const schema = yup.object().shape({
       name: yup.string().required(),
@@ -23,20 +22,26 @@ class SalaController {
     const nameDefault = name.trim().toLowerCase();
 
     try {
-      const existingSala = await Sala.findOne({ where: { name: nameDefault } });
+      const existingSala = await Sala.findOne({
+        where: { name: nameDefault }
+      });
 
       if (existingSala) {
-        return res.status(409).json({ message: 'Sala já existe!' });
+        return res.status(409).json({ message: "Sala já existe!" });
       }
 
       const sala = await Sala.create({
         name: nameDefault,
-        type
+        type,
+      });
+
+      io.emit("dashboard:update", {
+        type: "SALA_CREATED"
       });
 
       return res.status(201).json({
-        message: 'Sala criada com sucesso!',
-        sala
+        message: "Sala criada com sucesso!",
+        sala,
       });
 
     } catch (err) {
@@ -44,116 +49,147 @@ class SalaController {
         return res.status(409).json({ message: "Sala já existe!" });
       }
 
-      console.error('Erro ao criar sala:', err);
-      return res.status(500).json({ message: 'Erro interno ao criar sala' });
+      console.error("Erro ao criar sala:", err);
+      return res.status(500).json({
+        message: "Erro interno ao criar sala"
+      });
     }
   }
 
-  // Atualizar sala 🔷 (ESPAÇOS DE AULA) -> PUT
   async update(req, res) {
     const schema = yup.object().shape({
       name: yup.string(),
-      type: yup.string()
-    })
+      type: yup.string(),
+    });
 
-    // Validação com yup
     try {
       schema.validateSync(req.body, {
         abortEarly: false,
-        strict: true
+        strict: true,
       });
     } catch (err) {
-      return res.status(400).json({ error: err.errors });
+      return res.status(400).json({ message: err.errors });
     }
 
-    const { name, type } = req.body
-    const { id } = req.params
+    const { name, type } = req.body;
+    const { id } = req.params;
 
-    if (id) {
-      const espaco = await Sala.findByPk(id)
-      if (!espaco) {
-        return res.status(401).json({ message: "Sala não existe!!" })
+    try {
+      const sala = await Sala.findByPk(id);
+
+      if (!sala) {
+        return res.status(404).json({
+          message: "Sala não existe!"
+        });
       }
-    }
 
-    await Sala.update({
-      name,
-      type
-    },
-      {
-        where: {
-          id: id
+      const updatedName = name
+        ? name.trim().toLowerCase()
+        : sala.name;
+
+      if (name) {
+        const existing = await Sala.findOne({
+          where: { name: updatedName }
+        });
+
+        if (existing && existing.id !== Number(id)) {
+          return res.status(409).json({
+            message: "Já existe uma sala com esse nome!"
+          });
         }
+      }
+
+      await sala.update({
+        name: updatedName,
+        type: type ?? sala.type,
       });
 
-    return res.status(200).json({
-      message: "Atualizado!"
-    });
-  }
+      io.emit("dashboard:update", {
+        type: "SALA_UPDATED"
+      });
 
-  // Deletar sala 🔷 -> DELETE
-  async delete(req, res) {
-    const { id } = req.params
+      return res.status(200).json({
+        message: "Sala atualizada com sucesso!"
+      });
 
-    if (id) {
-      const espaco = await Sala.findByPk(id)
-      if (!espaco) {
-        return res.status(401).json({ message: "Espaço de aula não existe!" })
-      }
+    } catch (err) {
+      console.error("Erro ao atualizar sala:", err);
+
+      return res.status(500).json({
+        message: "Erro interno ao atualizar sala"
+      });
     }
-
-    await Sala.destroy({
-      where: { id: id }
-    })
-
-    return res.status(200).json({ message: "Deletado com sucesso!" })
   }
 
-  // Listar salas 🔷 -> GET 
+  async delete(req, res) {
+    const { id } = req.params;
+
+    try {
+      const sala = await Sala.findByPk(id);
+
+      if (!sala) {
+        return res.status(404).json({
+          message: "Sala não encontrada!"
+        });
+      }
+
+      await sala.destroy();
+
+      io.emit("dashboard:update", {
+        type: "SALA_DELETED"
+      });
+
+      return res.status(200).json({
+        message: "Sala deletada com sucesso!"
+      });
+
+    } catch (err) {
+      console.error("Erro ao deletar sala:", err);
+
+      return res.status(500).json({
+        message: "Erro interno ao deletar sala"
+      });
+    }
+  }
+
   async index(req, res) {
     try {
       const salas = await Sala.findAll({
-        include: ['Turmas'], // traz todas as turmas associadas
+        include: ["Turmas"],
       });
+
       return res.status(200).json(salas);
+
     } catch (err) {
-      console.error('Erro ao buscar salas:', err);
-      return res.status(500).json({ message: 'Erro interno ao buscar salas' });
+      console.error("Erro ao buscar salas:", err);
+
+      return res.status(500).json({
+        message: "Erro interno ao buscar salas"
+      });
     }
   }
 
-  // Listar salas disponiveis 🔷 -> GET
   async disponiveis(req, res) {
     const { turno } = req.query;
 
     try {
-      const where = {};
-
-      if (turno) {
-        where.turno = turno;
-      }
-
-      const turmas = await Turma.findAll({
-        where,
-        attributes: ["sala_id"]
+      const salas = await Sala.findAll({
+        include: {
+          model: Turma,
+          as: "Turmas",
+          required: false,
+          where: turno ? { turno } : undefined,
+        },
       });
 
-      const salasOcupadas = turmas
-        .map(t => t.sala_id)
-        .filter(id => id !== null);
-
-      const salasDisponiveis = await Sala.findAll({
-        where: {
-          id: {
-            [Op.notIn]: salasOcupadas.length ? salasOcupadas : [0]
-          }
-        }
+      const salasDisponiveis = salas.filter((sala) => {
+        return sala.Turmas.length === 0;
       });
 
       return res.status(200).json(salasDisponiveis);
 
     } catch (err) {
-      console.error("🔥 ERRO DISPONIVEIS:", err);
+      console.error("Erro ao buscar salas disponíveis:", err);
 
       return res.status(500).json({
         message: "Erro ao buscar salas disponíveis"

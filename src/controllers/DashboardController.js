@@ -22,7 +22,7 @@ class DashboardController {
         where.turno = turno;
       }
 
-      // 🔥 REMOVE TURMAS SEM SALA
+      //  REMOVE TURMAS SEM SALA
       where.sala_id = {
         [Op.ne]: null
       };
