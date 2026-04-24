@@ -8,11 +8,10 @@ export default function ordenarSalas(lista) {
     const nomeA = (a.sala || "").toLowerCase();
     const nomeB = (b.sala || "").toLowerCase();
 
-    // 🔹 prioridade por tipo
     const getTipo = (nome) => {
       if (nome.includes("sala")) return 1;
       if (nome.includes("lab")) return 2;
-      return 3; // especiais
+      return 3;
     };
 
     const tipoA = getTipo(nomeA);
@@ -20,7 +19,6 @@ export default function ordenarSalas(lista) {
 
     if (tipoA !== tipoB) return tipoA - tipoB;
 
-    // 🔹 ordenar pelo número
     return getNumero(nomeA) - getNumero(nomeB);
   });
 }

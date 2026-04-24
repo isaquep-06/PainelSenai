@@ -10,12 +10,12 @@ class TurmaController {
 
   async store(req, res) {
     const schema = yup.object().shape({
-      name: yup.string().required("Nome da turma é obrigatório!"),
+      name: yup.string().required("Nome da turma Ã© obrigatÃ³rio!"),
       turno: yup
         .string()
-        .required("Turno é obrigatório!")
+        .required("Turno Ã© obrigatÃ³rio!")
         .transform((v) => v?.trim().toLowerCase())
-        .oneOf(TURNOS_VALIDOS, "Turno inválido!"),
+        .oneOf(TURNOS_VALIDOS, "Turno invÃ¡lido!"),
       sala_id: yup.number().nullable(),
     });
 
@@ -36,7 +36,7 @@ class TurmaController {
 
       if (turmaExistente) {
         return res.status(400).json({
-          message: "Já existe uma turma com esse nome!",
+          message: "JÃ¡ existe uma turma com esse nome!",
         });
       }
 
@@ -44,7 +44,7 @@ class TurmaController {
         const sala = await Sala.findByPk(sala_id);
         if (!sala) {
           return res.status(400).json({
-            message: "Sala não existe!",
+            message: "Sala nÃ£o existe!",
           });
         }
       }
@@ -79,7 +79,7 @@ class TurmaController {
 
       if (err.name === "SequelizeUniqueConstraintError") {
         return res.status(400).json({
-          message: "Essa sala já está ocupada nesse turno!",
+          message: "Essa sala jÃ¡ estÃ¡ ocupada nesse turno!",
         });
       }
 
@@ -95,7 +95,7 @@ class TurmaController {
       turno: yup
         .string()
         .transform((v) => v?.trim().toLowerCase())
-        .oneOf(TURNOS_VALIDOS, "Turno inválido!")
+        .oneOf(TURNOS_VALIDOS, "Turno invÃ¡lido!")
         .notRequired(),
       sala_id: yup.number().nullable(),
     });
@@ -117,41 +117,36 @@ class TurmaController {
 
       if (!turma) {
         return res.status(404).json({
-          message: "Turma não existe!",
+          message: "Turma nÃ£o existe!",
         });
       }
 
-      // 🔹 valida nome duplicado
       if (name) {
         const nomeExistente = await Turma.findOne({ where: { name } });
 
         if (nomeExistente && nomeExistente.id !== Number(id)) {
           return res.status(400).json({
-            message: "Já existe uma turma com esse nome!",
+            message: "JÃ¡ existe uma turma com esse nome!",
           });
         }
       }
 
-      // 🔹 valida sala (só se não for undefined)
       if (sala_id !== undefined && sala_id !== null) {
         const sala = await Sala.findByPk(sala_id);
 
         if (!sala) {
           return res.status(400).json({
-            message: "Sala não existe!",
+            message: "Sala nÃ£o existe!",
           });
         }
       }
 
-      // 🔥 monta update seguro
       const updatedData = {
         name: name ?? turma.name,
         turno: turno ?? turma.turno,
       };
 
-      // 🔥 REGRA IMPORTANTE:
-      // null = remove sala
-      // undefined = mantém atual
+      // `null` remove a sala; `undefined` preserva o valor atual.
       if (sala_id === undefined) {
         updatedData.sala_id = turma.sala_id;
       } else {
@@ -175,7 +170,7 @@ class TurmaController {
 
       if (err.name === "SequelizeUniqueConstraintError") {
         return res.status(400).json({
-          message: "Conflito de dados (turma/sala já existe)!",
+          message: "Conflito de dados (turma/sala jÃ¡ existe)!",
         });
       }
 
@@ -193,7 +188,7 @@ class TurmaController {
 
       if (!turma) {
         return res.status(404).json({
-          message: "Turma não encontrada!",
+          message: "Turma nÃ£o encontrada!",
         });
       }
 

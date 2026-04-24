@@ -12,7 +12,6 @@ const models = {
   User: User.init(sequelize),
 };
 
-// Associações
 Object.values(models).forEach(model => {
   if (typeof model.associate === 'function') {
     model.associate(models);

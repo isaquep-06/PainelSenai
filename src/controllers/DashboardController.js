@@ -13,16 +13,14 @@ class DashboardController {
 
       const where = {};
 
-      // 🔹 filtro de turno
       if (turno) {
         if (!validTurnos.includes(turno)) {
-          return res.status(400).json({ message: "Turno inválido" });
+          return res.status(400).json({ message: "Turno invÃ¡lido" });
         }
 
         where.turno = turno;
       }
 
-      //  REMOVE TURMAS SEM SALA
       where.sala_id = {
         [Op.ne]: null
       };

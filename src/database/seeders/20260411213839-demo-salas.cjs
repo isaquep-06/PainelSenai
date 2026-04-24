@@ -3,8 +3,7 @@
 module.exports = {
   async up(queryInterface) {
     await queryInterface.bulkInsert('salas', [
-
-      // 🔹 SALAS COMUNS
+      // Salas comuns
       { name: 'Sala 02', type: 'comum', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Sala 03', type: 'comum', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Sala 05', type: 'comum', createdAt: new Date(), updatedAt: new Date() },
@@ -32,7 +31,7 @@ module.exports = {
       { name: 'Sala 30', type: 'comum', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Sala 33', type: 'comum', createdAt: new Date(), updatedAt: new Date() },
 
-      // 🔹 LABORATÓRIOS
+      // Laboratórios
       { name: 'Lab 01', type: 'laboratorio', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Lab 03', type: 'laboratorio', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Lab 04', type: 'laboratorio', createdAt: new Date(), updatedAt: new Date() },
@@ -41,28 +40,28 @@ module.exports = {
       { name: 'Lab Redes', type: 'laboratorio', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Lab Comissionamento', type: 'laboratorio', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Lab Inst. FV', type: 'laboratorio', createdAt: new Date(), updatedAt: new Date() },
-      { name: 'Lab Segurança', type: 'laboratorio', createdAt: new Date(), updatedAt: new Date() },
+      { name: 'Lab SeguranÃ§a', type: 'laboratorio', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Lab Projetos', type: 'laboratorio', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Lab Eletropostos', type: 'laboratorio', createdAt: new Date(), updatedAt: new Date() },
-      { name: 'Lab Refrigeração', type: 'laboratorio', createdAt: new Date(), updatedAt: new Date() },
+      { name: 'Lab RefrigeraÃ§Ã£o', type: 'laboratorio', createdAt: new Date(), updatedAt: new Date() },
 
-      // 🔹 ESPECIAIS
-      { name: 'Eletrônica', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
+      // Especiais
+      { name: 'EletrÃ´nica', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Predial', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Industrial', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
       { name: 'CLP', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
-      { name: 'Ensaios Elétricos', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
+      { name: 'Ensaios ElÃ©tricos', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
       { name: 'SEP', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Tornearia', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
-      { name: 'Manutenção', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
+      { name: 'ManutenÃ§Ã£o', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Caldeiraria', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Soldagem', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
-      { name: 'Plástico', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
+      { name: 'PlÃ¡stico', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Metrologia', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Metalografia', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
-      { name: 'Automação Mecânica', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
+      { name: 'AutomaÃ§Ã£o MecÃ¢nica', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
       { name: 'Ferramentaria', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
-      { name: 'Auditório', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
+      { name: 'AuditÃ³rio', type: 'especial', createdAt: new Date(), updatedAt: new Date() },
 
     ]);
   },

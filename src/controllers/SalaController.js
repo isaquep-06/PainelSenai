@@ -37,6 +37,7 @@ class SalaController {
 
       io.emit("dashboard:update", {
         type: "SALA_CREATED"
+        
       });
 
       return res.status(201).json({
