@@ -1,9 +1,10 @@
+import "dotenv/config";
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 
-import DatabaseConfig from "./database/index.js";
+import "./database/index.js";
 import turmaRoutes from "./routes/turmaRoutes.js";
 import salaRoutes from "./routes/salaRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -17,8 +18,20 @@ const allowedOrigins = [
   "https://painel-senai-frontend.vercel.app"
 ];
 
+const corsOriginValidator = (origin, callback) => {
+  if (!origin) {
+    return callback(null, true);
+  }
+
+  if (allowedOrigins.includes(origin)) {
+    return callback(null, true);
+  }
+
+  return callback(new Error("CORS origin not allowed"));
+};
+
 app.use(cors({
-  origin: allowedOrigins,
+  origin: corsOriginValidator,
   credentials: true
 }));
 

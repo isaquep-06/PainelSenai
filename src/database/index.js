@@ -1,21 +1,45 @@
+import "dotenv/config";
 import { Sequelize } from "sequelize";
 
-const connectionString = 'postgresql://neondb_owner:npg_rinbQdyPv8z5@ep-fragrant-sun-acpjeupu-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL nao definida.");
+}
+
+const connectionUrl = new URL(databaseUrl);
+connectionUrl.searchParams.delete("sslmode");
+connectionUrl.searchParams.delete("channel_binding");
+
+const connectionString = connectionUrl.toString();
 
 const sequelize = new Sequelize(connectionString, {
-  dialect: 'postgres',
+  dialect: "postgres",
   dialectOptions: {
-    ssl: { rejectUnauthorized: false }
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+    keepAlive: true,
   },
-  logging: false
+  pool: {
+    max: 10,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
+  retry: {
+    max: 3,
+  },
+  logging: false,
 });
 
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log('ConexÃ£o com Neon OK!')
+    console.log("Conexao com Neon OK!");
   } catch (err) {
-    console.error('Erro de conexÃ£o:', err);
+    console.error("Erro de conexao com Neon:", err);
   }
 })();
 
