@@ -40,31 +40,51 @@ class UploadController {
   // LISTAR
   async getAll(req, res) {
     try {
-      const images = await cloudinary.api.resources({
-        type: "upload",
-        resource_type: "image",
-        max_results: 100,
-      });
-
-      const videos = await cloudinary.api.resources({
-        type: "upload",
-        resource_type: "video",
-        max_results: 100,
-      });
+      const [images, videos] = await Promise.all([
+        cloudinary.api.resources({
+          type: "upload",
+          resource_type: "image",
+          max_results: 100,
+          context: true,
+        }),
+        cloudinary.api.resources({
+          type: "upload",
+          resource_type: "video",
+          max_results: 100,
+          context: true,
+        }),
+      ]);
 
       const all = [...images.resources, ...videos.resources];
 
-      const midias = all.map((item) => {
-        const active =
-          item.context?.custom?.active === "true";
+      const midias = all
+        .map((item) => {
+          // 🔥 Cloudinary NÃO garante custom sempre dentro de "custom"
+          const context = item.context || {};
 
-        return {
-          id: item.public_id,
-          type: item.resource_type,
-          src: item.secure_url,
-          active,
-        };
-      });
+          // suporta variações do Cloudinary
+          const rawActive =
+            context.custom?.active ??
+            context.active ??
+            item.context?.active;
+
+          const active =
+            rawActive === "true" ||
+            rawActive === true ||
+            rawActive === 1;
+
+          return {
+            id: item.public_id,
+            type: item.resource_type,
+            src: item.secure_url,
+            active: Boolean(active),
+            createdAt: item.created_at,
+          };
+        })
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt) - new Date(a.createdAt)
+        );
 
       return res.json(midias);
     } catch (error) {
@@ -82,18 +102,51 @@ class UploadController {
       const { id } = req.params;
       const { active } = req.body;
 
-      const current = await cloudinary.api.resource(id);
+      if (!id) {
+        return res.status(400).json({
+          message: "ID inválido",
+        });
+      }
 
+      // 🔥 BUSCA FORÇANDO TODOS OS TIPOS
+      let resource = null;
+
+      try {
+        resource = await cloudinary.api.resource(id, {
+          resource_type: "image",
+        });
+      } catch (e) { }
+
+      if (!resource) {
+        try {
+          resource = await cloudinary.api.resource(id, {
+            resource_type: "video",
+          });
+        } catch (e) { }
+      }
+
+      if (!resource) {
+        return res.status(404).json({
+          message: "Mídia não encontrada no Cloudinary",
+          debug: { id },
+        });
+      }
+
+      const resourceType = resource.resource_type;
+
+      // 🔥 ATUALIZAÇÃO CORRETA (sem reupload errado)
       await cloudinary.uploader.explicit(id, {
         type: "upload",
-        resource_type: current.resource_type,
+        resource_type: resourceType,
         context: {
           active: String(active),
         },
       });
 
       return res.json({
-        message: "Status atualizado",
+        message: "Status atualizado com sucesso",
+        id,
+        active: Boolean(active),
       });
 
     } catch (error) {
@@ -101,6 +154,7 @@ class UploadController {
 
       return res.status(500).json({
         message: "Erro ao atualizar status",
+        error: error.message,
       });
     }
   }
