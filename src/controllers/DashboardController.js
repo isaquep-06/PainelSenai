@@ -1,6 +1,7 @@
 import models from "../models/index.js";
 import ordenarSalas from "../Middleware/ordenarSala.js";
 import { Op } from "sequelize";
+import { getLatestSystemUpdate } from "../services/systemUpdateLogService.js";
 
 const { Turma, Sala } = models;
 
@@ -53,6 +54,29 @@ class DashboardController {
 
       return res.status(500).json({
         message: "Erro interno ao buscar dashboard"
+      });
+    }
+  }
+
+  async latestUpdate(req, res) {
+    try {
+      const latestUpdate = await getLatestSystemUpdate();
+
+      if (!latestUpdate) {
+        return res.status(200).json({
+          message: "Nenhuma atualização registrada até o momento.",
+          last_update: null,
+        });
+      }
+
+      return res.status(200).json({
+        last_update: latestUpdate,
+      });
+    } catch (err) {
+      console.error(err);
+
+      return res.status(500).json({
+        message: "Erro interno ao buscar a última atualização",
       });
     }
   }

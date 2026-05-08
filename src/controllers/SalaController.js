@@ -1,6 +1,7 @@
 import yup from "yup";
 import models from "../models/index.js";
 import { io } from "../server.js";
+import { registerSystemUpdate } from "../services/systemUpdateLogService.js";
 
 const { Sala, Turma } = models;
 
@@ -103,6 +104,26 @@ class SalaController {
       await sala.update({
         name: updatedName,
         type: type ?? sala.type,
+      });
+
+      const turmasDaSala = await Turma.findAll({
+        where: { sala_id: sala.id },
+        attributes: ["turno"],
+      });
+
+      const turnosAfetados = [...new Set(
+        turmasDaSala
+          .map((turma) => turma.turno)
+          .filter(Boolean)
+      )].sort();
+
+      await registerSystemUpdate({
+        entityType: "sala",
+        entityId: sala.id,
+        action: "updated",
+        turno: turnosAfetados[0] ?? null,
+        turnos: turnosAfetados,
+        userId: req.userId,
       });
 
       io.emit("dashboard:update", {

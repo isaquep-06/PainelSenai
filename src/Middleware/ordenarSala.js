@@ -1,8 +1,8 @@
 export default function ordenarSalas(lista) {
-  const getNumero = (nome) => {
-    const match = nome.match(/\d+/);
-    return match ? parseInt(match[0]) : 999;
-  };
+  const collator = new Intl.Collator("pt-BR", {
+    numeric: true,
+    sensitivity: "base",
+  });
 
   return lista.sort((a, b) => {
     const nomeA = (a.sala || "").toLowerCase();
@@ -19,6 +19,6 @@ export default function ordenarSalas(lista) {
 
     if (tipoA !== tipoB) return tipoA - tipoB;
 
-    return getNumero(nomeA) - getNumero(nomeB);
+    return collator.compare(nomeA, nomeB);
   });
 }

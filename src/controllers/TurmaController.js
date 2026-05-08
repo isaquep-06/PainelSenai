@@ -1,6 +1,7 @@
 import yup from "yup";
 import models from "../models/index.js";
 import { io } from "../server.js";
+import { registerSystemUpdate } from "../services/systemUpdateLogService.js";
 
 const { Turma, Sala } = models;
 
@@ -154,6 +155,15 @@ class TurmaController {
       }
 
       await turma.update(updatedData);
+
+      await registerSystemUpdate({
+        entityType: "turma",
+        entityId: turma.id,
+        action: "updated",
+        turno: updatedData.turno,
+        turnos: updatedData.turno ? [updatedData.turno] : [],
+        userId: req.userId,
+      });
 
       io.emit("dashboard:update", {
         type: "TURMA_UPDATED",
